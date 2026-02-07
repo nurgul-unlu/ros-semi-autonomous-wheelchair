@@ -1,0 +1,23 @@
+<launch>
+
+  <!-- ================= ESP32 SENSÖR HATTI ================= -->
+  <node pkg="robot1"
+      type="esp_sensor_node.py"
+      name="esp_sensor_node"
+      output="screen"/>
+  <!-- ================= SENSOR FÜZYON (EKF) ================= -->
+  
+
+  <!-- ================= USB KAMERA ================= -->
+  <node pkg="qr_reader"
+      type="simple_camera_node.py"
+      name="camera_node"
+      output="screen"/>
+
+  <!-- ================= QR OKUYUCU ================= -->
+  <node pkg="robot1" type="qr_reader_node.py" name="qr_reader" output="screen">
+    <param name="camera_topic" value="/usb_cam/image_raw"/>
+  </node>
+
+</launch>
+

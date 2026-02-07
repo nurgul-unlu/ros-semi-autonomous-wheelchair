@@ -1,0 +1,12 @@
+<launch>
+  <node pkg="robot_localization"
+        type="ekf_localization_node"
+        name="ekf_filter"
+        output="screen">
+
+    <rosparam command="load"
+              file="$(find robot1)/bringup/config/ekf.yaml"/>
+
+  </node>
+</launch>
+

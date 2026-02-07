@@ -1,0 +1,27 @@
+<launch>
+  <!-- Gazebo zamanı -->
+  <param name="use_sim_time" value="false"/>
+
+  <!-- SLAM Gmapping -->
+  <node pkg="gmapping"
+        type="slam_gmapping"
+        name="slam_gmapping"
+        output="screen">
+
+    <!-- Frame isimleri URDF'ine göre -->
+    <param name="odom_frame" value="odom"/>
+    <param name="base_frame" value="base_link"/>
+    <param name="map_update_interval" value="2.0"/>
+
+    <!-- Performans ayarları (TOF/LiDAR'a göre oynayabiliriz) -->
+    <param name="maxUrange" value="3.0"/>
+    <param name="maxRange"  value="3.0"/>
+    <param name="minimumScore" value="50"/>
+    <param name="delta" value="0.05"/>
+    <param name="particles" value="30"/>
+
+    <!-- Lazer verisi: URDF'te ön sensör /scan publish ediyor -->
+    <remap from="scan" to="/scan"/>
+  </node>
+</launch>
+

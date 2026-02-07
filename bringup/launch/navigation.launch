@@ -1,0 +1,33 @@
+<launch>
+
+  <!-- Hazır harita yükle -->
+  <node pkg="map_server"
+        type="map_server"
+        name="map_server"
+        args="$(find robot1)/map/harita2_ortam_harita.yaml"
+        output="screen"/>
+
+  <!-- AMCL lokalizasyon -->
+  <node pkg="amcl" type="amcl" name="amcl" output="screen">
+    <param name="odom_frame_id" value="odom"/>
+    <param name="base_frame_id" value="base_link"/>
+    <param name="global_frame_id" value="map"/>
+
+    <!-- ToF / Lidar -->
+    <remap from="scan" to="/tof_front"/>
+    <remap from="scan_left" to="/tof_left"/>
+    <remap from="scan_right" to="/tof_right"/>
+  </node>
+
+  <!-- move_base SADECE YOL ÇİZER -->
+  <node pkg="move_base" type="move_base" name="move_base" output="screen">
+   <rosparam file="$(find robot1)/config/costmap_common_params.yaml" command="load"/>
+   <rosparam file="$(find robot1)/config/global_costmap_params.yaml" command="load"/>
+   <rosparam file="$(find robot1)/config/local_costmap_params.yaml" command="load"/>
+
+    <!-- 🔒 move_base robotu süremez -->
+    <remap from="cmd_vel" to="/move_base_cmd_vel"/>
+  </node>
+
+</launch>
+

@@ -1,0 +1,80 @@
+<launch>
+  <param name="use_sim_time" value="true"/>
+
+  <!-- ========  ARGUMENTS ======== -->
+  <arg name="slam" default="true"/>
+  <arg name="nav" default="true"/>
+  <arg name="open_rviz" default="true"/>
+  <arg name="world_name" default="$(find haritamiz2_ortam)/worlds/haritamiz2_ortam.world"/>
+k0
+  <!-- ========  ROBOT MODEL ======== -->
+  <param name="robot_description"
+         textfile="$(find robot1)/urdf/robot1.urdf"/>
+     <!-- Gerçek robot aktif mi? -->
+  <arg name="real_robot" default="true"/>
+
+  <!-- ========  TF + Joint Publisher ======== -->
+  <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher"/>
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher"/>
+    <param if="$(arg real_robot)" name="use_sim_time" value="false"/>
+
+    <!-- ========  GAZEBO ======== -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="true"/>
+    <arg name="world_name" value="$(arg world_name)"/>
+  </include>
+
+  <!-- ========  ROBOTU GAZEBO'YA EKLE ======== -->
+  <node name="spawn_urdf"
+        pkg="gazebo_ros"
+        type="spawn_model"
+        args="-urdf -param robot_description -model robot1"
+        output="screen"/>
+
+
+  <!-- ========  SENSOR NODE’LARI ======== -->
+  <include file="$(find robot1)/bringup/launch/sensors.launch"/>
+
+  <!-- ========  EKF (SENSÖR FÜZYONU) ======== -->
+  <include file="$(find robot1)/bringup/launch/ekf.launch"/>
+
+  <!-- ========  SLAM (Gmapping) ======== -->
+  <group if="$(arg slam)">
+    <include file="$(find robot1)/bringup/launch/gmapping.launch"/>
+  </group>
+
+  <!-- ======== NAVİGASYON (AMCL + MOVE_BASE) ======== -->
+  <group if="$(arg nav)">
+    <include file="$(find robot1)/bringup/launch/navigation.launch"/>
+  </group>
+    <!-- ======== QR PATH PLANNER ======== -->
+  <node pkg="robot1"
+        type="qr_path_planner.py"
+        name="qr_path_planner"
+        output="screen"/>
+
+  <!-- ======== RVIZ ======== -->
+  <group if="$(arg open_rviz)">
+    <node name="rviz"
+          pkg="rviz"
+          type="rviz"
+          args="-d $(find robot1)/rviz/robot1.rviz"
+          output="screen"/>
+  </group>
+  <!-- ======== ROSSerial (ESP32) ======== -->
+
+ <!-- ========== JOYSTICK TELEOP ========== -->
+ <node pkg="robot1"
+      type="usb_joystick_teleop.py"
+      name="usb_joystick_teleop"
+      output="screen"/>
+  <node if="$(arg real_robot)"
+        pkg="robot1"
+        type="cmd_vel_to_esp.py"
+        name="cmd_vel_to_esp"
+        output="screen">
+      </node>
+</launch>
+
